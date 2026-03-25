@@ -76,7 +76,7 @@ public struct TimelineComposer {
 
             let start = CMTime(seconds: clip.trimStart, preferredTimescale: timeScale)
             let sourceRange = CMTimeRange(start: start, duration: duration)
-            let gainLayers = decomposedGainLayers(for: clip.volume)
+            let gainLayers = decomposedGainLayers(for: clip.mixGain)
 
             try clipTrack.insertTimeRange(sourceRange, of: sourceTrack, at: cursor)
 
@@ -155,7 +155,7 @@ public struct TimelineComposer {
     }
 
     private func decomposedGainLayers(for volume: Double) -> [Float] {
-        var remaining = min(max(volume, 0), 4)
+        var remaining = min(max(volume, 0), 16)
         var layers: [Float] = []
 
         while remaining > 0.0001 {

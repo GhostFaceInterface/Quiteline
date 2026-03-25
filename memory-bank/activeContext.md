@@ -28,6 +28,8 @@
 - Timeline composer klip-bazli audio track yapisina gecirildi; ses seviyesi ve fade degisikliklerinin preview/export tarafinda gercekten uygulanmasi hedeflendi
 - Preview rebuild artik oynatma konumunu sifirlamiyor; slider ile ses degistirirken ayni bolgede dinleyerek test etmek mumkun
 - `1.0` uzeri clip volume icin gain katmanlara ayrildi; ornegin `1.33x` bir tam-volume ve bir `0.33` volume track olarak miksleniyor
+- Volume kontrolune perceptual gain egri eklendi; `1.33` kontrol degeri artik daha yuksek, daha duyulur bir efektif boost uretiyor
+- Gain layer ayristirma ust limiti artirildi ve boost egri dB benzeri daha sert yorumlanmaya baslandi
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi
@@ -38,6 +40,8 @@
 - Waveform secimi icin drag anchor secili klip araligina clamp ediliyor; seek ise tum timeline uzerinde kalmaya devam ediyor
 - Ses slider'i yalnizca UI state degil; composer rebuild sonrasi player item audioMix zincirine bagli olmalı
 - `AVMutableAudioMixInputParameters` tarafinda boost davranisi belirsiz olabilecegi icin paralel track layering tercih edildi
+- UI'da ses alani artik efektif miks gain'ini gosteriyor; kontrol degeri ile duysal etki birebir lineer degil
+- Onceki implementasyonda boost layer sayisi `4` ile sinirliydi; bu da yuksek ses artisini erken bastiriyordu
 
 ## Next Steps
 - Gercek medya dosyalariyla timeline waveform seek davranisini manuel test et

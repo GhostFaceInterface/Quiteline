@@ -18,6 +18,8 @@
 - Timeline waveform seek tum timeline uzerinde serbesttir, ancak bolge secimi secili klibin zaman araligina kilitlenir
 - Ses/fade envelope'lari tek ortak track yerine klip-bazli composition track'lere uygulanir; amac preview ve export'ta gain degisikliklerini guvenilir yapmak
 - `1.0` ustu gain icin tek parametreye bel baglanmaz; clip birden fazla paralel audio track katmanina bolunerek boost fiziksel olarak mikslenir
+- Volume kontrolu lineer degil, perceptual egri ile yorumlanir; amac kucuk slider hareketlerinde daha belirgin duyusal fark vermek
+- Gain layer ayristirma ust siniri daha yuksektir; buyuk boost degerleri artik 4x civarinda erken tikanmaz
 - Undo/redo snapshot tabanlidir:
   - Klip listesi, secili klip, waveform secimi ve export format state'i snapshot olarak tutulur
   - Surekli slider hareketleri tek history adimi olacak sekilde gruplanir

@@ -529,7 +529,7 @@ struct ContentView: View {
 
                 sliderCard(
                     title: "Ses",
-                    valueText: String(format: "%.2fx", clip.volume),
+                    valueText: String(format: "%.2fx", clip.mixGain),
                     tint: LonerTheme.accentSoft,
                     range: 0...2,
                     onEditingChanged: handleSliderEditingChanged,
@@ -750,6 +750,9 @@ struct ContentView: View {
                     Spacer(minLength: 8)
 
                     Text(String(format: "x%.2f", clip.volume))
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.white.opacity(0.85) : LonerTheme.textSecondary)
+                    Text(String(format: "etki %.2fx", clip.mixGain))
                         .font(.system(size: 13, weight: .semibold, design: .rounded))
                         .foregroundStyle(isSelected ? Color.white.opacity(0.85) : LonerTheme.textSecondary)
                 }

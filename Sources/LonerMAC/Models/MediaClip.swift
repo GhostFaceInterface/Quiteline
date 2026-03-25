@@ -48,6 +48,17 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         max(trimEnd - trimStart, 0)
     }
 
+    public var mixGain: Double {
+        let clampedVolume = min(max(volume, 0), 2)
+
+        if clampedVolume >= 1 {
+            let boostProgress = clampedVolume - 1
+            return pow(10, (boostProgress * 24) / 20)
+        }
+
+        return pow(clampedVolume, 2.2)
+    }
+
     public var normalizedFadeDurations: (fadeIn: Double, fadeOut: Double) {
         let duration = effectiveDuration
         guard duration > 0 else {

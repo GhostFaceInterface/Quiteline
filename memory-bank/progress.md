@@ -18,6 +18,8 @@
 - Klip-bazli audio track mix yapisi
 - Preview rebuild sonrasinda oynatma konumunu koruma
 - `1.0x` ustu boost icin paralel gain-layer miksleme
+- Daha agresif perceptual volume egri
+- Daha yuksek gain-layer ust siniri
 
 ## In Progress
 - Gercek kullanimda timeline waveform ve `space` davranisinin manuel dogrulanmasi
