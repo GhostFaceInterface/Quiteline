@@ -14,12 +14,16 @@ struct TimelineWaveformView: View {
     let totalDuration: Double
     let playheadTime: Double
     let selectedClipID: UUID?
+    let editableRange: ClosedRange<Double>?
     let selection: ClosedRange<Double>?
     let zoom: Double
     let onSeek: (Double) -> Void
     let onSelectionChange: (ClosedRange<Double>?) -> Void
 
     @State private var dragAnchorTime: Double?
+
+    private let minimumSelectionDistance: CGFloat = 5
+    private let minimumSelectionDuration: Double = 0.02
 
     var body: some View {
         GeometryReader { geometry in
@@ -144,25 +148,36 @@ struct TimelineWaveformView: View {
     private func selectionGesture(contentWidth: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                let startTime = dragAnchorTime ?? time(for: value.startLocation.x, width: contentWidth)
+                let startTime = dragAnchorTime ?? clampedEditableTime(
+                    for: time(for: value.startLocation.x, width: contentWidth)
+                )
                 dragAnchorTime = startTime
-                let currentTime = time(for: value.location.x, width: contentWidth)
+                let currentTime = clampedEditableTime(
+                    for: time(for: value.location.x, width: contentWidth)
+                )
                 let lower = min(startTime, currentTime)
                 let upper = max(startTime, currentTime)
+                let dragDistance = abs(value.translation.width)
 
-                if upper - lower >= 0.10 {
+                if dragDistance >= minimumSelectionDistance,
+                   upper - lower >= minimumSelectionDuration {
                     onSelectionChange(lower...upper)
                 }
             }
             .onEnded { value in
-                let startTime = dragAnchorTime ?? time(for: value.startLocation.x, width: contentWidth)
-                let currentTime = time(for: value.location.x, width: contentWidth)
+                let startTime = dragAnchorTime ?? clampedEditableTime(
+                    for: time(for: value.startLocation.x, width: contentWidth)
+                )
+                let currentTime = clampedEditableTime(
+                    for: time(for: value.location.x, width: contentWidth)
+                )
                 let lower = min(startTime, currentTime)
                 let upper = max(startTime, currentTime)
+                let dragDistance = abs(value.translation.width)
 
-                if upper - lower < 0.10 {
+                if dragDistance < minimumSelectionDistance || upper - lower < minimumSelectionDuration {
                     onSelectionChange(nil)
-                    onSeek(currentTime)
+                    onSeek(time(for: value.location.x, width: contentWidth))
                 } else {
                     onSelectionChange(lower...upper)
                 }
@@ -185,6 +200,14 @@ struct TimelineWaveformView: View {
         }
 
         return min(max(Double(xPosition / width) * totalDuration, 0), totalDuration)
+    }
+
+    private func clampedEditableTime(for time: Double) -> Double {
+        guard let editableRange else {
+            return time
+        }
+
+        return min(max(time, editableRange.lowerBound), editableRange.upperBound)
     }
 
     private func strideSamples(_ samples: [Float], targetCount: Int) -> [Float] {

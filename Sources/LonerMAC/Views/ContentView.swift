@@ -6,6 +6,7 @@ struct ContentView: View {
     @ObservedObject var viewModel: ProjectViewModel
     @FocusState private var focusedField: FocusedField?
     @FocusState private var playbackSurfaceFocused: Bool
+    @State private var localKeyMonitor: Any?
 
     private let controlColumns = [
         GridItem(.flexible(), spacing: 12),
@@ -63,6 +64,10 @@ struct ContentView: View {
         .onAppear {
             NSApp.activate(ignoringOtherApps: true)
             playbackSurfaceFocused = true
+            installLocalKeyMonitorIfNeeded()
+        }
+        .onDisappear {
+            removeLocalKeyMonitor()
         }
         .onTapGesture {
             if focusedField == nil {
@@ -103,6 +108,14 @@ struct ContentView: View {
             Spacer(minLength: 12)
 
             HStack(spacing: 8) {
+                toolbarButton("Geri Al", systemImage: "arrow.uturn.backward") {
+                    viewModel.undo()
+                }
+                .disabled(!viewModel.canUndo)
+                toolbarButton("Ileri Al", systemImage: "arrow.uturn.forward") {
+                    viewModel.redo()
+                }
+                .disabled(!viewModel.canRedo)
                 toolbarButton("Ac", systemImage: "folder") {
                     viewModel.openProject()
                 }
@@ -338,6 +351,7 @@ struct ContentView: View {
                     valueText: TimeFormatter.string(from: clip.effectiveDuration),
                     tint: LonerTheme.accent,
                     range: 0.25...20,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.effectiveDuration ?? 2 },
                         set: { viewModel.updateSilenceDuration($0) }
@@ -418,6 +432,7 @@ struct ContentView: View {
                 totalDuration: viewModel.totalDuration,
                 playheadTime: viewModel.playbackTime,
                 selectedClipID: viewModel.selectedClipID,
+                editableRange: viewModel.selectedClipTimelineRange,
                 selection: selection,
                 zoom: viewModel.waveformZoom,
                 onSeek: { viewModel.seekTimeline(to: $0) },
@@ -493,6 +508,7 @@ struct ContentView: View {
                     valueText: TimeFormatter.string(from: clip.trimStart),
                     tint: LonerTheme.accentSecondary,
                     range: 0...clip.durationSeconds,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.trimStart ?? 0 },
                         set: { viewModel.updateTrimStart($0) }
@@ -504,6 +520,7 @@ struct ContentView: View {
                     valueText: TimeFormatter.string(from: clip.trimEnd),
                     tint: LonerTheme.accent,
                     range: 0...clip.durationSeconds,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.trimEnd ?? clip.durationSeconds },
                         set: { viewModel.updateTrimEnd($0) }
@@ -515,6 +532,7 @@ struct ContentView: View {
                     valueText: String(format: "%.2fx", clip.volume),
                     tint: LonerTheme.accentSoft,
                     range: 0...2,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.volume ?? 1 },
                         set: { viewModel.updateVolume($0) }
@@ -526,6 +544,7 @@ struct ContentView: View {
                     valueText: TimeFormatter.string(from: clip.fadeInDuration),
                     tint: LonerTheme.accentSecondary,
                     range: 0...clip.effectiveDuration,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.fadeInDuration ?? 0 },
                         set: { viewModel.updateFadeIn($0) }
@@ -537,6 +556,7 @@ struct ContentView: View {
                     valueText: TimeFormatter.string(from: clip.fadeOutDuration),
                     tint: LonerTheme.accent,
                     range: 0...clip.effectiveDuration,
+                    onEditingChanged: handleSliderEditingChanged,
                     value: Binding(
                         get: { viewModel.selectedClip?.fadeOutDuration ?? 0 },
                         set: { viewModel.updateFadeOut($0) }
@@ -587,7 +607,7 @@ struct ContentView: View {
             HStack(spacing: 8) {
                 ForEach(ExportFormat.allCases, id: \.self) { format in
                     Button(format.title) {
-                        viewModel.exportSettings.format = format
+                        viewModel.updateExportFormat(format)
                     }
                     .buttonStyle(
                         PillButtonStyle(
@@ -795,6 +815,7 @@ struct ContentView: View {
         valueText: String,
         tint: Color,
         range: ClosedRange<Double>,
+        onEditingChanged: @escaping (Bool) -> Void = { _ in },
         value: Binding<Double>
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -808,7 +829,7 @@ struct ContentView: View {
                     .foregroundStyle(LonerTheme.textSecondary)
             }
 
-            Slider(value: value, in: range)
+            Slider(value: value, in: range, onEditingChanged: onEditingChanged)
                 .tint(tint)
         }
         .padding(14)
@@ -832,5 +853,54 @@ struct ContentView: View {
 
     private func clipColor(forIndex index: Int) -> Color {
         clipPalette[index % clipPalette.count]
+    }
+
+    private func handleSliderEditingChanged(_ isEditing: Bool) {
+        if isEditing {
+            viewModel.beginContinuousEdit()
+        } else {
+            viewModel.endContinuousEdit()
+        }
+    }
+
+    private func installLocalKeyMonitorIfNeeded() {
+        guard localKeyMonitor == nil else {
+            return
+        }
+
+        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            handleLocalKeyEvent(event)
+        }
+    }
+
+    private func removeLocalKeyMonitor() {
+        if let localKeyMonitor {
+            NSEvent.removeMonitor(localKeyMonitor)
+            self.localKeyMonitor = nil
+        }
+    }
+
+    private func handleLocalKeyEvent(_ event: NSEvent) -> NSEvent? {
+        guard NSApp.isActive,
+              !(NSApp.keyWindow?.firstResponder is NSTextView) else {
+            return event
+        }
+
+        let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+        guard event.charactersIgnoringModifiers?.lowercased() == "z" else {
+            return event
+        }
+
+        if (modifiers == [.command] || modifiers == [.control]), viewModel.canUndo {
+            viewModel.undo()
+            return nil
+        }
+
+        if (modifiers == [.command, .shift] || modifiers == [.control, .shift]), viewModel.canRedo {
+            viewModel.redo()
+            return nil
+        }
+
+        return event
     }
 }

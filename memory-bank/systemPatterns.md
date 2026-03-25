@@ -14,6 +14,10 @@
 ## Editing Pattern
 - Ayrintili duzenleme secili klip bazli yapilir
 - Waveform secimi ve bolge silme `ProjectViewModel` icinde klibi parcaya bolerek uygulanir
+- Timeline waveform seek tum timeline uzerinde serbesttir, ancak bolge secimi secili klibin zaman araligina kilitlenir
+- Undo/redo snapshot tabanlidir:
+  - Klip listesi, secili klip, waveform secimi ve export format state'i snapshot olarak tutulur
+  - Surekli slider hareketleri tek history adimi olacak sekilde gruplanir
 
 ## Emerging Pattern
 - Tek ana waveform yaklasimi tercih edilir:

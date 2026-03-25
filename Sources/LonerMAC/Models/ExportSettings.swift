@@ -44,7 +44,7 @@ public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
     }
 }
 
-public struct ExportSettings: Codable {
+public struct ExportSettings: Codable, Equatable {
     public var fileName: String = "MergedAudio"
     public var format: ExportFormat = .m4a
 

@@ -20,6 +20,8 @@ final class ProjectViewModel: ObservableObject {
     @Published var successMessage: String?
     @Published var waveformSelection: ClosedRange<Double>?
     @Published var waveformZoom: Double = 0.2
+    @Published private(set) var canUndo = false
+    @Published private(set) var canRedo = false
 
     let player = AVPlayer()
     let supportedImportTypes: [UTType] = [
@@ -38,6 +40,16 @@ final class ProjectViewModel: ObservableObject {
     private var playbackMonitorTask: Task<Void, Never>?
     private var clipOffsets: [UUID: Double] = [:]
     private var accessedURLs: [URL] = []
+    private var undoStack: [EditorSnapshot] = []
+    private var redoStack: [EditorSnapshot] = []
+    private var pendingContinuousEditSnapshot: EditorSnapshot?
+
+    private struct EditorSnapshot: Equatable {
+        let clips: [MediaClip]
+        let selectedClipID: UUID?
+        let waveformSelection: ClosedRange<Double>?
+        let exportSettings: ExportSettings
+    }
 
     init() {
         startPlaybackMonitor()
@@ -166,7 +178,10 @@ final class ProjectViewModel: ObservableObject {
             }
         }
 
-        clips.append(contentsOf: importedClips)
+        if !importedClips.isEmpty {
+            registerUndoSnapshot()
+            clips.append(contentsOf: importedClips)
+        }
 
         if selectedClipID == nil {
             selectedClipID = clips.first?.id
@@ -205,6 +220,7 @@ final class ProjectViewModel: ObservableObject {
             return
         }
 
+        registerUndoSnapshot()
         clips.remove(at: index)
         waveformSelection = nil
 
@@ -226,6 +242,7 @@ final class ProjectViewModel: ObservableObject {
             return
         }
 
+        registerUndoSnapshot()
         clips.swapAt(index, index - 1)
         schedulePreviewRefresh()
     }
@@ -235,6 +252,7 @@ final class ProjectViewModel: ObservableObject {
             return
         }
 
+        registerUndoSnapshot()
         clips.swapAt(index, index + 1)
         schedulePreviewRefresh()
     }
@@ -415,9 +433,13 @@ final class ProjectViewModel: ObservableObject {
         let leftDuration = absoluteStart - clip.trimStart
         let rightDuration = clip.trimEnd - absoluteEnd
 
+        registerUndoSnapshot()
+
         if leftDuration < minimumSegmentDuration, rightDuration < minimumSegmentDuration {
-            clips.remove(at: index)
-            selectedClipID = clips.indices.contains(index) ? clips[index].id : clips.last?.id
+            waveformSelection = nil
+            errorMessage = "Tum klibi silmek icin soldaki Sil dugmesini kullanin."
+            successMessage = nil
+            return
         } else if leftDuration < minimumSegmentDuration {
             clips[index] = clip.duplicated(
                 trimStart: absoluteEnd,
@@ -478,6 +500,8 @@ final class ProjectViewModel: ObservableObject {
     func addSilenceClip(duration: Double = 2) {
         let silenceClip = MediaClip.silence(durationSeconds: duration)
 
+        registerUndoSnapshot()
+
         if let index = selectedClipIndex {
             clips.insert(silenceClip, at: index + 1)
         } else {
@@ -532,6 +556,7 @@ final class ProjectViewModel: ObservableObject {
 
         do {
             let project = try persistenceService.load(from: url)
+            registerUndoSnapshot()
             clips = project.clips
             exportSettings = project.exportSettings
             selectedClipID = clips.first?.id
@@ -555,6 +580,73 @@ final class ProjectViewModel: ObservableObject {
         }
     }
 
+    func updateExportFormat(_ format: ExportFormat) {
+        guard exportSettings.format != format else {
+            return
+        }
+
+        registerUndoSnapshot()
+        exportSettings.format = format
+        successMessage = nil
+    }
+
+    func beginContinuousEdit() {
+        guard pendingContinuousEditSnapshot == nil else {
+            return
+        }
+
+        pendingContinuousEditSnapshot = makeSnapshot()
+    }
+
+    func endContinuousEdit() {
+        guard let snapshot = pendingContinuousEditSnapshot else {
+            return
+        }
+
+        pendingContinuousEditSnapshot = nil
+        if snapshot != makeSnapshot() {
+            pushUndoSnapshot(snapshot)
+        } else {
+            updateHistoryAvailability()
+        }
+    }
+
+    func undo() {
+        endContinuousEdit()
+
+        guard let snapshot = undoStack.popLast() else {
+            return
+        }
+
+        let currentSnapshot = makeSnapshot()
+        if redoStack.last != currentSnapshot {
+            redoStack.append(currentSnapshot)
+        }
+
+        applySnapshot(snapshot)
+        successMessage = "Geri alindi."
+        errorMessage = nil
+        updateHistoryAvailability()
+    }
+
+    func redo() {
+        endContinuousEdit()
+
+        guard let snapshot = redoStack.popLast() else {
+            return
+        }
+
+        let currentSnapshot = makeSnapshot()
+        if undoStack.last != currentSnapshot {
+            undoStack.append(currentSnapshot)
+        }
+
+        applySnapshot(snapshot)
+        successMessage = "Tekrar uygulandi."
+        errorMessage = nil
+        updateHistoryAvailability()
+    }
+
     private var selectedClipIndex: Int? {
         guard let selectedClipID else {
             return nil
@@ -568,10 +660,59 @@ final class ProjectViewModel: ObservableObject {
             return
         }
 
+        registerUndoSnapshot()
         update(&clips[index])
         waveformSelection = nil
         successMessage = nil
         schedulePreviewRefresh()
+    }
+
+    private func registerUndoSnapshot() {
+        guard pendingContinuousEditSnapshot == nil else {
+            return
+        }
+
+        pushUndoSnapshot(makeSnapshot())
+    }
+
+    private func pushUndoSnapshot(_ snapshot: EditorSnapshot) {
+        guard undoStack.last != snapshot else {
+            updateHistoryAvailability()
+            return
+        }
+
+        undoStack.append(snapshot)
+
+        if undoStack.count > 100 {
+            undoStack.removeFirst(undoStack.count - 100)
+        }
+
+        redoStack.removeAll()
+        updateHistoryAvailability()
+    }
+
+    private func makeSnapshot() -> EditorSnapshot {
+        EditorSnapshot(
+            clips: clips,
+            selectedClipID: selectedClipID,
+            waveformSelection: waveformSelection,
+            exportSettings: exportSettings
+        )
+    }
+
+    private func applySnapshot(_ snapshot: EditorSnapshot) {
+        clips = snapshot.clips
+        selectedClipID = snapshot.selectedClipID.flatMap { id in
+            snapshot.clips.contains(where: { $0.id == id }) ? id : snapshot.clips.first?.id
+        } ?? snapshot.clips.first?.id
+        waveformSelection = snapshot.waveformSelection
+        exportSettings = snapshot.exportSettings
+        schedulePreviewRefresh()
+    }
+
+    private func updateHistoryAvailability() {
+        canUndo = !undoStack.isEmpty || pendingContinuousEditSnapshot != nil
+        canRedo = !redoStack.isEmpty
     }
 
     private func schedulePreviewRefresh() {
