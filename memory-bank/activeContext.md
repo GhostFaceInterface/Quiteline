@@ -34,6 +34,7 @@
 - AudioWaveformService import sirasinda global peak amplitude degeri de cikarmaya basladi
 - MediaClip modeline `peakAmplitudeEstimate` eklendi ve geriye donuk decode destegi verildi
 - Ses artisi artik klibin tahmini tepe seviyesine gore guvenli tavanda clamp ediliyor; amac output clipping ve bozulmayi onlemek
+- Secili klip basligi artik secilebilir ve kopyalanabilir; sidebar klip kartlarina da sag tik ile ad/yol kopyalama eklendi
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi

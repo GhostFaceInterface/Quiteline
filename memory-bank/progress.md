@@ -22,6 +22,7 @@
 - Daha yuksek gain-layer ust siniri
 - Clip kenarinda mikro artifakt klipleri engelleyen cut snap davranisi
 - Peak-aware safe gain clamp
+- Kopyalanabilir klip basligi ve klip karti context menu copy aksiyonlari
 
 ## In Progress
 - Gercek kullanimda timeline waveform ve `space` davranisinin manuel dogrulanmasi

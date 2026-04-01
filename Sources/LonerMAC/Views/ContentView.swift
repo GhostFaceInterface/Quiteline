@@ -396,6 +396,18 @@ struct ContentView: View {
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(LonerTheme.textSecondary)
                 }
+                .textSelection(.enabled)
+                .contextMenu {
+                    Button("Metni Kopyala") {
+                        copyToPasteboard(clip.displayName)
+                    }
+
+                    if let sourceURL = clip.sourceURL {
+                        Button("Dosya Yolunu Kopyala") {
+                            copyToPasteboard(sourceURL.path)
+                        }
+                    }
+                }
 
                 Spacer()
 
@@ -777,6 +789,17 @@ struct ContentView: View {
             )
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            Button("Klip Adini Kopyala") {
+                copyToPasteboard(clip.displayName)
+            }
+
+            if let sourceURL = clip.sourceURL {
+                Button("Dosya Yolunu Kopyala") {
+                    copyToPasteboard(sourceURL.path)
+                }
+            }
+        }
     }
 
     private func sidebarAction(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
@@ -856,6 +879,13 @@ struct ContentView: View {
 
     private func clipColor(forIndex index: Int) -> Color {
         clipPalette[index % clipPalette.count]
+    }
+
+    private func copyToPasteboard(_ text: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        viewModel.successMessage = "Metin panoya kopyalandi."
+        viewModel.errorMessage = nil
     }
 
     private func handleSliderEditingChanged(_ isEditing: Bool) {
