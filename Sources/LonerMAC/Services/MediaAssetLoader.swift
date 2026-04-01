@@ -36,14 +36,18 @@ public struct MediaAssetLoader {
         }
 
         let waveformSamples: [Float]
+        let peakAmplitudeEstimate: Float
         do {
-            waveformSamples = try waveformService.generateSamples(
+            let analysis = try waveformService.generateSamples(
                 from: asset,
                 audioTrack: audioTrack,
                 durationSeconds: seconds
             )
+            waveformSamples = analysis.normalizedSamples
+            peakAmplitudeEstimate = analysis.peakAmplitude
         } catch {
             waveformSamples = Array(repeating: 0.12, count: 480)
+            peakAmplitudeEstimate = 0.9
         }
 
         return MediaClip(
@@ -51,6 +55,7 @@ public struct MediaAssetLoader {
             displayName: url.deletingPathExtension().lastPathComponent,
             durationSeconds: seconds,
             trimEnd: seconds,
+            peakAmplitudeEstimate: Double(peakAmplitudeEstimate),
             waveformSamples: waveformSamples
         )
     }

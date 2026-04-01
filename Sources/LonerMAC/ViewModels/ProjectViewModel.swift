@@ -421,9 +421,20 @@ final class ProjectViewModel: ObservableObject {
             return
         }
 
-        let absoluteStart = min(max(clip.trimStart + selection.lowerBound, clip.trimStart), clip.trimEnd)
-        let absoluteEnd = min(max(clip.trimStart + selection.upperBound, clip.trimStart), clip.trimEnd)
+        let boundarySnapDuration = min(max(clip.effectiveDuration * 0.004, 0.12), 0.45)
         let minimumSegmentDuration = 0.05
+        let minimumRemainderDuration = max(boundarySnapDuration, 0.18)
+
+        var absoluteStart = min(max(clip.trimStart + selection.lowerBound, clip.trimStart), clip.trimEnd)
+        var absoluteEnd = min(max(clip.trimStart + selection.upperBound, clip.trimStart), clip.trimEnd)
+
+        if absoluteStart - clip.trimStart <= boundarySnapDuration {
+            absoluteStart = clip.trimStart
+        }
+
+        if clip.trimEnd - absoluteEnd <= boundarySnapDuration {
+            absoluteEnd = clip.trimEnd
+        }
 
         guard absoluteEnd - absoluteStart >= minimumSegmentDuration else {
             waveformSelection = nil
@@ -435,18 +446,18 @@ final class ProjectViewModel: ObservableObject {
 
         registerUndoSnapshot()
 
-        if leftDuration < minimumSegmentDuration, rightDuration < minimumSegmentDuration {
+        if leftDuration < minimumRemainderDuration, rightDuration < minimumRemainderDuration {
             waveformSelection = nil
             errorMessage = "Tum klibi silmek icin soldaki Sil dugmesini kullanin."
             successMessage = nil
             return
-        } else if leftDuration < minimumSegmentDuration {
+        } else if leftDuration < minimumRemainderDuration {
             clips[index] = clip.duplicated(
                 trimStart: absoluteEnd,
                 fadeInDuration: 0
             )
             selectedClipID = clips[index].id
-        } else if rightDuration < minimumSegmentDuration {
+        } else if rightDuration < minimumRemainderDuration {
             clips[index] = clip.duplicated(
                 trimEnd: absoluteStart,
                 fadeOutDuration: 0

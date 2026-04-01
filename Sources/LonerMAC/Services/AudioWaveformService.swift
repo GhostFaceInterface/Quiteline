@@ -19,14 +19,22 @@ enum AudioWaveformServiceError: LocalizedError {
 }
 
 struct AudioWaveformService {
+    struct AnalysisResult {
+        let normalizedSamples: [Float]
+        let peakAmplitude: Float
+    }
+
     func generateSamples(
         from asset: AVURLAsset,
         audioTrack: AVAssetTrack,
         durationSeconds: Double,
         targetSampleCount: Int = 1800
-    ) throws -> [Float] {
+    ) throws -> AnalysisResult {
         guard durationSeconds > 0 else {
-            return Array(repeating: 0.05, count: targetSampleCount)
+            return AnalysisResult(
+                normalizedSamples: Array(repeating: 0.05, count: targetSampleCount),
+                peakAmplitude: 0.05
+            )
         }
 
         guard let reader = try? AVAssetReader(asset: asset) else {
@@ -55,6 +63,7 @@ struct AudioWaveformService {
 
         var bucketTotals = Array(repeating: 0.0, count: targetSampleCount)
         var bucketCounts = Array(repeating: 0, count: targetSampleCount)
+        var globalPeakAmplitude = 0.0
 
         while let sampleBuffer = output.copyNextSampleBuffer() {
             defer {
@@ -90,9 +99,13 @@ struct AudioWaveformService {
             }
 
             var sum = 0.0
+            var localPeak = 0.0
             for sample in samples {
-                sum += Double(abs(Int(sample)))
+                let absoluteSample = Double(abs(Int(sample))) / Double(Int16.max)
+                sum += absoluteSample
+                localPeak = max(localPeak, absoluteSample)
             }
+            globalPeakAmplitude = max(globalPeakAmplitude, localPeak)
 
             let averageAmplitude = sum / Double(sampleCount) / Double(Int16.max)
             let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
@@ -115,9 +128,15 @@ struct AudioWaveformService {
 
         let maxValue = averaged.max() ?? 0
         guard maxValue > 0 else {
-            return Array(repeating: 0.05, count: targetSampleCount)
+            return AnalysisResult(
+                normalizedSamples: Array(repeating: 0.05, count: targetSampleCount),
+                peakAmplitude: Float(max(globalPeakAmplitude, 0.05))
+            )
         }
 
-        return averaged.map { max($0 / maxValue, 0.04) }
+        return AnalysisResult(
+            normalizedSamples: averaged.map { max($0 / maxValue, 0.04) },
+            peakAmplitude: Float(max(globalPeakAmplitude, 0.05))
+        )
     }
 }

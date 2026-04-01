@@ -20,6 +20,8 @@
 - `1.0x` ustu boost icin paralel gain-layer miksleme
 - Daha agresif perceptual volume egri
 - Daha yuksek gain-layer ust siniri
+- Clip kenarinda mikro artifakt klipleri engelleyen cut snap davranisi
+- Peak-aware safe gain clamp
 
 ## In Progress
 - Gercek kullanimda timeline waveform ve `space` davranisinin manuel dogrulanmasi

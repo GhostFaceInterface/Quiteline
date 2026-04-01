@@ -30,6 +30,10 @@
 - `1.0` uzeri clip volume icin gain katmanlara ayrildi; ornegin `1.33x` bir tam-volume ve bir `0.33` volume track olarak miksleniyor
 - Volume kontrolune perceptual gain egri eklendi; `1.33` kontrol degeri artik daha yuksek, daha duyulur bir efektif boost uretiyor
 - Gain layer ayristirma ust limiti artirildi ve boost egri dB benzeri daha sert yorumlanmaya baslandi
+- Waveform cut mantigina boundary snap ve minimum remainder kurali eklendi; clip kenarinda kalan cok kisa artiklar artik ayri klip olarak birakilmamali
+- AudioWaveformService import sirasinda global peak amplitude degeri de cikarmaya basladi
+- MediaClip modeline `peakAmplitudeEstimate` eklendi ve geriye donuk decode destegi verildi
+- Ses artisi artik klibin tahmini tepe seviyesine gore guvenli tavanda clamp ediliyor; amac output clipping ve bozulmayi onlemek
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi
@@ -42,6 +46,8 @@
 - `AVMutableAudioMixInputParameters` tarafinda boost davranisi belirsiz olabilecegi icin paralel track layering tercih edildi
 - UI'da ses alani artik efektif miks gain'ini gosteriyor; kontrol degeri ile duysal etki birebir lineer degil
 - Onceki implementasyonda boost layer sayisi `4` ile sinirliydi; bu da yuksek ses artisini erken bastiriyordu
+- Onceki cut implementasyonunda clip kenarina cok yakin secimler 00:00 gibi gorunen mikro klipler uretebiliyordu
+- Eski volume implementasyonunda sadece istenen gain buyutuluyordu; clip peak'i dikkate alinmadigi icin distortion ve "sesler birbirine girme" olusabiliyordu
 
 ## Next Steps
 - Gercek medya dosyalariyla timeline waveform seek davranisini manuel test et

@@ -16,6 +16,7 @@ public struct MediaClip: Identifiable, Equatable, Codable {
     public var volume: Double
     public var fadeInDuration: Double
     public var fadeOutDuration: Double
+    public var peakAmplitudeEstimate: Double
     public var waveformSamples: [Float]
 
     public init(
@@ -29,6 +30,7 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         volume: Double = 1,
         fadeInDuration: Double = 0,
         fadeOutDuration: Double = 0,
+        peakAmplitudeEstimate: Double = 1,
         waveformSamples: [Float] = []
     ) {
         self.id = id
@@ -41,6 +43,7 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         self.volume = volume
         self.fadeInDuration = max(fadeInDuration, 0)
         self.fadeOutDuration = max(fadeOutDuration, 0)
+        self.peakAmplitudeEstimate = min(max(peakAmplitudeEstimate, 0.01), 1)
         self.waveformSamples = waveformSamples
     }
 
@@ -48,15 +51,23 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         max(trimEnd - trimStart, 0)
     }
 
-    public var mixGain: Double {
+    public var requestedMixGain: Double {
         let clampedVolume = min(max(volume, 0), 2)
 
         if clampedVolume >= 1 {
             let boostProgress = clampedVolume - 1
-            return pow(10, (boostProgress * 24) / 20)
+            return pow(10, (boostProgress * 18) / 20)
         }
 
         return pow(clampedVolume, 2.2)
+    }
+
+    public var maximumSafeGain: Double {
+        min(0.98 / max(peakAmplitudeEstimate, 0.01), 8)
+    }
+
+    public var mixGain: Double {
+        min(requestedMixGain, maximumSafeGain)
     }
 
     public var normalizedFadeDurations: (fadeIn: Double, fadeOut: Double) {
@@ -81,6 +92,43 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         kind == .silence
     }
 
+    enum CodingKeys: String, CodingKey {
+        case id
+        case kind
+        case sourceURL
+        case displayName
+        case durationSeconds
+        case trimStart
+        case trimEnd
+        case volume
+        case fadeInDuration
+        case fadeOutDuration
+        case peakAmplitudeEstimate
+        case waveformSamples
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        kind = try container.decodeIfPresent(MediaClipKind.self, forKey: .kind) ?? .media
+        sourceURL = try container.decodeIfPresent(URL.self, forKey: .sourceURL)
+        displayName = try container.decode(String.self, forKey: .displayName)
+        durationSeconds = max(try container.decode(Double.self, forKey: .durationSeconds), 0)
+        trimStart = max(try container.decodeIfPresent(Double.self, forKey: .trimStart) ?? 0, 0)
+        trimEnd = min(
+            try container.decodeIfPresent(Double.self, forKey: .trimEnd) ?? durationSeconds,
+            durationSeconds
+        )
+        volume = try container.decodeIfPresent(Double.self, forKey: .volume) ?? 1
+        fadeInDuration = max(try container.decodeIfPresent(Double.self, forKey: .fadeInDuration) ?? 0, 0)
+        fadeOutDuration = max(try container.decodeIfPresent(Double.self, forKey: .fadeOutDuration) ?? 0, 0)
+        peakAmplitudeEstimate = min(
+            max(try container.decodeIfPresent(Double.self, forKey: .peakAmplitudeEstimate) ?? 1, 0.01),
+            1
+        )
+        waveformSamples = try container.decodeIfPresent([Float].self, forKey: .waveformSamples) ?? []
+    }
+
     public func duplicated(
         id: UUID = UUID(),
         trimStart: Double? = nil,
@@ -101,6 +149,7 @@ public struct MediaClip: Identifiable, Equatable, Codable {
             volume: volume ?? self.volume,
             fadeInDuration: fadeInDuration ?? self.fadeInDuration,
             fadeOutDuration: fadeOutDuration ?? self.fadeOutDuration,
+            peakAmplitudeEstimate: peakAmplitudeEstimate,
             waveformSamples: waveformSamples ?? self.waveformSamples
         )
     }
@@ -114,6 +163,7 @@ public struct MediaClip: Identifiable, Equatable, Codable {
             displayName: "Silence",
             durationSeconds: clampedDuration,
             trimEnd: clampedDuration,
+            peakAmplitudeEstimate: 0.01,
             waveformSamples: Array(repeating: 0.04, count: 480)
         )
     }
