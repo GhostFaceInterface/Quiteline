@@ -4,6 +4,7 @@ import Foundation
 public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
     case m4a
     case caf
+    case mp4
 
     public var id: String { rawValue }
 
@@ -13,6 +14,8 @@ public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
             return "M4A Audio"
         case .caf:
             return "CAF PCM"
+        case .mp4:
+            return "MP4 Video"
         }
     }
 
@@ -22,6 +25,8 @@ public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
             return "m4a"
         case .caf:
             return "caf"
+        case .mp4:
+            return "mp4"
         }
     }
 
@@ -31,6 +36,8 @@ public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
             return .m4a
         case .caf:
             return .caf
+        case .mp4:
+            return .mp4
         }
     }
 
@@ -40,7 +47,13 @@ public enum ExportFormat: String, CaseIterable, Identifiable, Codable {
             return AVAssetExportPresetAppleM4A
         case .caf:
             return AVAssetExportPresetPassthrough
+        case .mp4:
+            return AVAssetExportPresetPassthrough
         }
+    }
+
+    public var isVideo: Bool {
+        self == .mp4
     }
 }
 
@@ -54,14 +67,26 @@ public struct ExportSettings: Codable, Equatable {
     }
 
     public var suggestedFileName: String {
-        let trimmedName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let baseName = trimmedName.isEmpty ? "MergedAudio" : trimmedName
+        let baseName = normalizedBaseName
 
         if baseName.lowercased().hasSuffix(".\(format.fileExtension)") {
             return baseName
         }
 
         return "\(baseName).\(format.fileExtension)"
+    }
+
+    private var normalizedBaseName: String {
+        let trimmedName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let baseName = trimmedName.isEmpty ? "MergedAudio" : trimmedName
+        let existingExtension = (baseName as NSString).pathExtension.lowercased()
+        let knownExportExtensions = Set(ExportFormat.allCases.map(\.fileExtension))
+
+        if knownExportExtensions.contains(existingExtension) {
+            return (baseName as NSString).deletingPathExtension
+        }
+
+        return baseName
     }
 
     public func resolvedURL(from pickedURL: URL) -> URL {

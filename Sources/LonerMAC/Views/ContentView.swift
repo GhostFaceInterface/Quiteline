@@ -616,7 +616,7 @@ struct ContentView: View {
                     )
             }
 
-            HStack(spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], alignment: .leading, spacing: 8) {
                 ForEach(ExportFormat.allCases, id: \.self) { format in
                     Button(format.title) {
                         viewModel.updateExportFormat(format)

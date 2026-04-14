@@ -27,6 +27,18 @@
   - Klip listesi, secili klip, waveform secimi ve export format state'i snapshot olarak tutulur
   - Surekli slider hareketleri tek history adimi olacak sekilde gruplanir
 
+## Export Pattern
+- Audio export icin mevcut AVMutableComposition + AVMutableAudioMix akisi korunur
+- Video export icin `TimelineComposer.build(includeVideo: true)` ayni timeline'a video track'leri de ekler
+- MP4 export, kliplerde ses/fade/boost efekti yoksa `AVAssetExportPresetPassthrough` kullanir; amac orijinal video ve audio segmentlerini yeniden encode etmeden ciktiya almak ve dosya boyutu sismesini onlemektir
+- Video klipler tek passthrough video track icine timeline sirasiyla yerlestirilir
+- Efektsiz MP4 export'ta audio segmentleri tek passthrough audio track icine yerlestirilir; boylece cikti birden fazla audio track uretmez
+- Gercek video iceren MP4 passthrough export'ta audio-only veya silence araliklari video track'te bos zaman araligi olarak birakilir; bu, orijinal video segmentlerini kopyalamayi ve codec/format uyumsuzlugundan kacmayi hedefler
+- Timeline'da hic gercek video yoksa video format cikti icin 160x90, 1 fps, dusuk bitrate gecici siyah H.264 video uretilir
+- Gecici siyah video dosyasi olusturulduysa export tamamlandiktan sonra `ProjectViewModel` tarafinda temizlenir
+- Ses/fade/boost efekti olan MP4 export'larda audioMix gerekir; bu durumda mevcut AVFoundation reencode fallback'i kullanilir
+- Efektsiz MP4 passthrough basarisiz olursa `ExportService` 960x540 `videoComposition` fallback'i ile yeniden dener; bu fallback siyah arka plani video bosluklari icin de kullanir
+
 ## Emerging Pattern
 - Tek ana waveform yaklasimi tercih edilir:
   - Ana waveform tum klipleri ard arda gosterir

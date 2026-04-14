@@ -35,6 +35,9 @@ public struct MediaAssetLoader {
             throw MediaAssetLoaderError.noAudioTrack(url)
         }
 
+        let videoTracks = try await asset.loadTracks(withMediaType: .video)
+        let videoMetadata = try await loadVideoMetadata(from: videoTracks.first)
+
         let waveformSamples: [Float]
         let peakAmplitudeEstimate: Float
         do {
@@ -56,7 +59,25 @@ public struct MediaAssetLoader {
             durationSeconds: seconds,
             trimEnd: seconds,
             peakAmplitudeEstimate: Double(peakAmplitudeEstimate),
-            waveformSamples: waveformSamples
+            waveformSamples: waveformSamples,
+            hasVideo: videoMetadata.hasVideo,
+            videoWidth: videoMetadata.width,
+            videoHeight: videoMetadata.height
         )
+    }
+
+    @MainActor
+    private func loadVideoMetadata(from videoTrack: AVAssetTrack?) async throws -> (hasVideo: Bool, width: Double, height: Double) {
+        guard let videoTrack else {
+            return (false, 0, 0)
+        }
+
+        let naturalSize = try await videoTrack.load(.naturalSize)
+        let preferredTransform = try await videoTrack.load(.preferredTransform)
+        let transformedSize = naturalSize.applying(preferredTransform)
+        let width = abs(transformedSize.width)
+        let height = abs(transformedSize.height)
+
+        return (true, Double(width), Double(height))
     }
 }

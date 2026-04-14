@@ -18,6 +18,9 @@ public struct MediaClip: Identifiable, Equatable, Codable {
     public var fadeOutDuration: Double
     public var peakAmplitudeEstimate: Double
     public var waveformSamples: [Float]
+    public var hasVideo: Bool
+    public var videoWidth: Double
+    public var videoHeight: Double
 
     public init(
         id: UUID = UUID(),
@@ -31,7 +34,10 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         fadeInDuration: Double = 0,
         fadeOutDuration: Double = 0,
         peakAmplitudeEstimate: Double = 1,
-        waveformSamples: [Float] = []
+        waveformSamples: [Float] = [],
+        hasVideo: Bool = false,
+        videoWidth: Double = 0,
+        videoHeight: Double = 0
     ) {
         self.id = id
         self.kind = kind
@@ -45,6 +51,9 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         self.fadeOutDuration = max(fadeOutDuration, 0)
         self.peakAmplitudeEstimate = min(max(peakAmplitudeEstimate, 0.01), 1)
         self.waveformSamples = waveformSamples
+        self.hasVideo = hasVideo
+        self.videoWidth = max(videoWidth, 0)
+        self.videoHeight = max(videoHeight, 0)
     }
 
     public var effectiveDuration: Double {
@@ -105,6 +114,9 @@ public struct MediaClip: Identifiable, Equatable, Codable {
         case fadeOutDuration
         case peakAmplitudeEstimate
         case waveformSamples
+        case hasVideo
+        case videoWidth
+        case videoHeight
     }
 
     public init(from decoder: Decoder) throws {
@@ -127,6 +139,9 @@ public struct MediaClip: Identifiable, Equatable, Codable {
             1
         )
         waveformSamples = try container.decodeIfPresent([Float].self, forKey: .waveformSamples) ?? []
+        hasVideo = try container.decodeIfPresent(Bool.self, forKey: .hasVideo) ?? false
+        videoWidth = max(try container.decodeIfPresent(Double.self, forKey: .videoWidth) ?? 0, 0)
+        videoHeight = max(try container.decodeIfPresent(Double.self, forKey: .videoHeight) ?? 0, 0)
     }
 
     public func duplicated(
@@ -150,7 +165,10 @@ public struct MediaClip: Identifiable, Equatable, Codable {
             fadeInDuration: fadeInDuration ?? self.fadeInDuration,
             fadeOutDuration: fadeOutDuration ?? self.fadeOutDuration,
             peakAmplitudeEstimate: peakAmplitudeEstimate,
-            waveformSamples: waveformSamples ?? self.waveformSamples
+            waveformSamples: waveformSamples ?? self.waveformSamples,
+            hasVideo: hasVideo,
+            videoWidth: videoWidth,
+            videoHeight: videoHeight
         )
     }
 

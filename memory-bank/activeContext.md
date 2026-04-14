@@ -1,10 +1,9 @@
 # Active Context
 
 ## Current Task
-1. `AGENTS.md` talebine gore memory-bank yapisini kurmak
-2. Timeline waveform'da secili klibin sonundan sonraki klibe gecisi mumkun kilmak
-3. `Space` icin daha guvenli bir oynat/durdur cozumü bulmak
-4. Proje duzenlemeleri icin `Cmd/Ctrl+Z` ve redo mekanizmasi eklemek
+1. Export format secimini yalnizca audio ile sinirli olmaktan cikarmak
+2. Input dosyalari audio, video veya karisik olsa bile kullanici isterse MP4 video output uretmek
+3. Audio-only bolumlerde video export icin bos/siyah goruntu kullanmak
 
 ## Recent Changes
 - Arayuz daha kompakt hale getirildi
@@ -35,6 +34,15 @@
 - MediaClip modeline `peakAmplitudeEstimate` eklendi ve geriye donuk decode destegi verildi
 - Ses artisi artik klibin tahmini tepe seviyesine gore guvenli tavanda clamp ediliyor; amac output clipping ve bozulmayi onlemek
 - Secili klip basligi artik secilebilir ve kopyalanabilir; sidebar klip kartlarina da sag tik ile ad/yol kopyalama eklendi
+- Export formatlarina `MP4 Video` eklendi
+- `MediaClip` import sirasinda video izi olup olmadigini ve temel video boyutunu saklamaya basladi
+- `TimelineComposer` audio preview icin eski hafif build yolunu koruyor; video export istendiginde video klipleri tek passthrough video track'e yerlestiriyor
+- Ses/fade/boost efekti olmayan MP4 export'ta audio klipler de tek passthrough audio track'e yerlestiriliyor; boylece video export audioMix kullanmadan orijinal medyayi kopyalayabiliyor
+- MP4 export'ta audio-only ve silence araliklari, timeline'da gercek video varsa passthrough video track boslugu olarak; hic gercek video yoksa 160x90, 1 fps, dusuk bitrate siyah H.264 video ile temsil ediliyor
+- Gecici siyah video dosyasi olusturulduysa export tamamlandiktan sonra temizleniyor
+- MP4 export dosya boyutu kontrol altina alindi; efektsiz export'ta `AVAssetExportPresetPassthrough`, `audioMix = nil` ve `videoComposition = nil` ile orijinal medya segmentlerinin yeniden encode edilmesi engelleniyor
+- MP4 passthrough export'ta gercek video iceren projelerde audio-only/silence araliklari artik video track icinde bos zaman araligi olarak birakiliyor; bu, orijinal video segmentlerini yeniden encode etmeden kopyalama sansini artiriyor ve dusuk cozunurluklu siyah klibin codec/format uyumsuzluguyla export'u bozmasini engelliyor
+- Tum proje audio-only ise video format output icin 160x90, 1 fps, dusuk bitrate siyah H.264 gecici video asset'i hala kullaniliyor
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi
@@ -49,6 +57,10 @@
 - Onceki implementasyonda boost layer sayisi `4` ile sinirliydi; bu da yuksek ses artisini erken bastiriyordu
 - Onceki cut implementasyonunda clip kenarina cok yakin secimler 00:00 gibi gorunen mikro klipler uretebiliyordu
 - Eski volume implementasyonunda sadece istenen gain buyutuluyordu; clip peak'i dikkate alinmadigi icin distortion ve "sesler birbirine girme" olusabiliyordu
+- MP4 video export efektsiz kliplerde sabit render size kullanmiyor; video composition kapali oldugu icin orijinal video segmentleri passthrough export edilir
+- Video export icin gecici siyah video yalnizca timeline'da hic gercek video yoksa 160x90, 1 fps ve dusuk bitrate olarak uretilir; gercek video bulunan projelerde audio-only araliklar passthrough track boslugu olarak temsil edilir
+- Ses/fade/boost efekti olan MP4 export'ta passthrough kullanilmaz; audioMix gerektigi icin AVFoundation reencode fallback'i devreye girer
+- Passthrough export farkli codec, transform veya boyut kombinasyonlarinda gercek medya ile mutlaka kontrol edilmeli; bu yol dosya boyutunu dusurur ama AVFoundation uyumlulugu inputlara bagli olabilir. Passthrough basarisiz olursa `AVAssetExportPreset960x540` videoComposition fallback'i siyah arka planla devreye girer
 
 ## Next Steps
 - Gercek medya dosyalariyla timeline waveform seek davranisini manuel test et
@@ -57,3 +69,4 @@
 - Undo/redo akisini import, trim, ses, fade, silme ve klip tasima uzerinde manuel dogrula
 - Hassas waveform seciminin gercek uzun medya dosyalarinda rahat kullanilip kullanilmadigini manuel dogrula
 - Ses slider'inin hem preview hem export sonucunda kulakla manuel dogrulamasini yap
+- MP4 video export'u audio-only, video-only ve karisik input senaryolarinda manuel dogrula

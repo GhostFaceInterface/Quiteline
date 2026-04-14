@@ -792,10 +792,17 @@ final class ProjectViewModel: ObservableObject {
         exportProgress = 0
 
         do {
-            let build = try await composer.build(from: clips)
+            let build = try await composer.build(from: clips, includeVideo: exportSettings.format.isVideo)
+            defer {
+                for temporaryURL in build.temporaryURLs {
+                    try? FileManager.default.removeItem(at: temporaryURL)
+                }
+            }
+
             try await exportService.export(
                 composition: build.composition,
                 audioMix: build.audioMix,
+                videoComposition: build.videoComposition,
                 to: url,
                 format: exportSettings.format
             ) { [weak self] progress in
