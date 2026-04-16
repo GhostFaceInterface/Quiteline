@@ -1,7 +1,7 @@
 # Project Brief
 
 ## Project
-LonerMAC, SwiftUI ve AVFoundation tabanli bir macOS audio birlestirme ve duzenleme uygulamasidir.
+Quietline, SwiftUI ve AVFoundation tabanli bir macOS audio birlestirme ve duzenleme uygulamasidir.
 
 ## Core Goals
 - Audio ve video dosyalarindan sesi import etmek

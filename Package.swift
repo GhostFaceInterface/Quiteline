@@ -3,20 +3,20 @@
 import PackageDescription
 
 let package = Package(
-    name: "LonerMAC",
+    name: "Quietline",
     platforms: [
         .macOS(.v14)
     ],
     products: [
         .executable(
-            name: "LonerMAC",
-            targets: ["LonerMAC"]
+            name: "Quietline",
+            targets: ["Quietline"]
         )
     ],
     targets: [
         .executableTarget(
-            name: "LonerMAC",
-            path: "Sources/LonerMAC"
+            name: "Quietline",
+            path: "Sources/Quietline"
         )
     ]
 )

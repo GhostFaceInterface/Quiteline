@@ -10,6 +10,10 @@
 - Swift Package
 - Minimum platform: macOS 14
 - Ana komut: `swift build`
+- Masaustu app bundle akisi: `./script/build_and_run.sh`
+- Bundle-only dogrulama: `./script/build_and_run.sh --bundle`
+- Launch/process dogrulama: `./script/build_and_run.sh --verify`
+- Yerel kullanici kurulumu: `./script/build_and_run.sh --install`
 
 ## Constraints
 - AVFoundation export katmaninda Swift 6 `Sendable` uyarilari var, ancak build bloklayici degil
@@ -20,3 +24,5 @@
 - Gercek video iceren MP4 passthrough export'ta audio-only/silence bolumleri video track boslugu olarak temsil ediliyor; passthrough basarisiz olursa 960x540 videoComposition fallback siyah arka planla tekrar deneniyor
 - Hic gercek video olmayan MP4 bolumleri icin gecici siyah video 160x90, 1 fps, dusuk bitrate H.264 olarak uretiliyor
 - Ses/fade/boost gerektiren MP4 export audioMix ister; passthrough bu durumda kullanilmamali, reencode fallback beklenir
+- SwiftPM GUI app dogrudan executable olarak calistirilmamali; Dock/foreground ve bundle metadata icin `.app` bundle launch kullanilmali
+- App icon, `Scripts/GenerateAppIcon.swift` ile PNG iconset olarak uretilip `iconutil` ile `AppIcon.icns` dosyasina cevrilir

@@ -31,6 +31,12 @@
 - Gercek video bulunmayan MP4 export icin 160x90, 1 fps, dusuk bitrate siyah video placeholder
 - Gercek video iceren MP4 passthrough export'ta audio-only/silence araliklarini dusuk cozunurluklu ek video klibi yerine video track boslugu olarak temsil etme
 - Hic gercek video olmayan MP4 export'ta 160x90, 1 fps, dusuk bitrate siyah H.264 placeholder kullanmaya devam etme
+- `dist/Quietline.app` ureten SwiftPM app bundle paketleme akisi
+- Dock/foreground launch icin `script/build_and_run.sh`
+- Codex Run aksiyonunun `.app` launch scriptine baglanmasi
+- Uygulama bundle'i icin uretilen `AppIcon.icns`
+- Uygulama adi, paket hedefi, bundle metadata'si ve kurulu app Quietline olarak yeniden adlandirildi
+- Eski app kopyalari `dist` ve `~/Applications` altindan kaldirildi
 
 ## In Progress
 - Gercek kullanimda timeline waveform ve `space` davranisinin manuel dogrulanmasi
@@ -53,3 +59,8 @@
 - `ffprobe` yerelde bulunmadigi icin smoke output stream detaylari `ffmpeg -i` ile kontrol edildi
 - Audio-only ara bolumu video track boslugu olarak birakan yeni passthrough smoke testi basarili; cikti tek video + tek audio stream olarak olustu ve boyut girdilerin toplamına yakin kaldi
 - `swift test` denendi ancak projede `Tests` target'i olmadigi icin SwiftPM `no tests found` hatasiyla cikti; `swift build` basarili
+- Masaustu app bundle akisi `./script/build_and_run.sh --verify` ile dogrulandi; build basarili, `dist/Quietline.app` uretildi ve process launch edildi
+- `dist/Quietline.app` ve `/Users/boe747/Applications/Quietline.app` icin `codesign --verify --deep --strict` basarili
+- `/Users/boe747/Applications/Quietline.app` kurulumu tamamlandi; kullanici artik Finder/Spotlight/Dock uzerinden uygulama ikonuna tiklayarak acabilir
+- Rename sonrasi eski marka referanslari kaynak, dokuman ve config dosyalarinda bulunmadi
+- SwiftPM build cache temizlenip Quietline olarak yeniden build edildi; eski marka adli build artefact'i kalmadigi dogrulandi

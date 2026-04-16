@@ -5,6 +5,7 @@ Packages/
 Package.resolved
 
 DerivedData/
+dist/
 *.xcworkspace
 xcuserdata/
 *.xccheckout

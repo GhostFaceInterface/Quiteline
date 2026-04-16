@@ -530,7 +530,7 @@ final class ProjectViewModel: ObservableObject {
         panel.title = "Projeyi Kaydet"
         panel.prompt = "Kaydet"
         panel.nameFieldLabel = "Proje dosyasi:"
-        panel.nameFieldStringValue = "LonerMAC Project.json"
+        panel.nameFieldStringValue = "Quietline Project.json"
         panel.canCreateDirectories = true
         panel.allowedContentTypes = [UTType.json]
 

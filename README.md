@@ -1,4 +1,4 @@
-# Soundwave
+# Quietline
 
 SwiftUI ve AVFoundation tabanli bir macOS audio birlestirme uygulamasi.
 
@@ -24,8 +24,21 @@ SwiftUI ve AVFoundation tabanli bir macOS audio birlestirme uygulamasi.
 
 ## Calistirma
 ```bash
-swift build
-swift run
+./script/build_and_run.sh
+```
+
+Bu komut SwiftPM ciktisini `dist/Quietline.app` olarak paketler ve uygulamayi
+normal bir macOS app bundle'i olarak acar. Finder'dan dogrudan acmak icin:
+
+```bash
+./script/build_and_run.sh --bundle
+open dist/Quietline.app
+```
+
+Uygulamayi kullanici Applications klasorune kopyalamak icin:
+
+```bash
+./script/build_and_run.sh --install
 ```
 
 Xcode ile acmak isterseniz `Package.swift` dosyasini dogrudan acabilirsiniz.
@@ -37,29 +50,27 @@ Xcode ile acmak isterseniz `Package.swift` dosyasini dogrudan acabilirsiniz.
 4. Sag editor alaninda waveform uzerinde tiklayarak oynatma kafasini istediginiz noktaya goturun.
 5. Problemli bir sesi cikarmak icin waveform uzerinde tiklayip surukleyerek bolge secin, sonra `Secili Bolgeyi Sil` butonunu kullanin.
 6. Alt panelde trim, ses seviyesi, fade in ve fade out ayarlarini yapin.
-7. Gerekirse `Sessizlik` ile timeline'a bosluk ekleyin.
-8. Tek ana oynatma tusu ile dinleyin; secili klipten baslatmak icin `Secili Klipten Oynat` butonunu kullanin.
-9. `Export` alanindan varsayilan dosya adini ve formati belirleyin.
-10. `Export` ile kayit konumu ve dosya adini secip ciktiyi alin.
-11. Calismanizi tekrar acmak icin `Kaydet` ile JSON proje dosyasi kaydedin, sonra `Ac` ile geri yukleyin.
+7. Tek ana oynatma tusu ile dinleyin; secili klipten baslatmak icin `Secili Klipten Oynat` butonunu kullanin.
+8. `Export` alanindan varsayilan dosya adini ve formati belirleyin.
+9. `Export` ile kayit konumu ve dosya adini secip ciktiyi alin.
 
 ## Dogrulama
 ```bash
 swift build
-swiftc -o /tmp/Soundwave-smoke \
-  Sources/Soundwave/Models/MediaClip.swift \
-  Sources/Soundwave/Models/ExportSettings.swift \
-  Sources/Soundwave/Models/SavedProject.swift \
-  Sources/Soundwave/Models/TimelineBuildResult.swift \
-  Sources/Soundwave/Services/AudioWaveformService.swift \
-  Sources/Soundwave/Services/MediaAssetLoader.swift \
-  Sources/Soundwave/Services/TimelineComposer.swift \
-  Sources/Soundwave/Services/ProjectPersistenceService.swift \
-  Sources/Soundwave/Services/ExportService.swift \
+./script/build_and_run.sh --verify
+swiftc -o /tmp/quietline-smoke \
+  Sources/Quietline/Models/MediaClip.swift \
+  Sources/Quietline/Models/ExportSettings.swift \
+  Sources/Quietline/Models/SavedProject.swift \
+  Sources/Quietline/Models/TimelineBuildResult.swift \
+  Sources/Quietline/Services/AudioWaveformService.swift \
+  Sources/Quietline/Services/MediaAssetLoader.swift \
+  Sources/Quietline/Services/TimelineComposer.swift \
+  Sources/Quietline/Services/ProjectPersistenceService.swift \
+  Sources/Quietline/Services/ExportService.swift \
   Scripts/SmokeCheck.swift
-/tmp/Soundwave-smoke
+/tmp/quietline-smoke
 ```
 
 ## Performans
 Buyuk proje davranis notlari icin [PERFORMANCE.md](./PERFORMANCE.md) dosyasina bakin.
-# Soundwave

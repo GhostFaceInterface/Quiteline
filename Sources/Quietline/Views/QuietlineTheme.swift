@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum LonerTheme {
+enum QuietlineTheme {
     static let backgroundTop = Color(red: 0.95, green: 0.93, blue: 0.89)
     static let backgroundBottom = Color(red: 0.91, green: 0.88, blue: 0.84)
     static let panel = Color(red: 0.99, green: 0.98, blue: 0.96)
@@ -28,7 +28,7 @@ enum LonerTheme {
 
 struct StudioPanelModifier: ViewModifier {
     var padding: CGFloat = 18
-    var fill: Color = LonerTheme.panel
+    var fill: Color = QuietlineTheme.panel
 
     func body(content: Content) -> some View {
         content
@@ -38,7 +38,7 @@ struct StudioPanelModifier: ViewModifier {
                     .fill(fill)
                     .overlay(
                         RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(LonerTheme.border, lineWidth: 1)
+                            .stroke(QuietlineTheme.border, lineWidth: 1)
                     )
             )
             .shadow(color: Color.black.opacity(0.04), radius: 10, y: 3)
@@ -46,7 +46,7 @@ struct StudioPanelModifier: ViewModifier {
 }
 
 extension View {
-    func studioPanel(padding: CGFloat = 18, fill: Color = LonerTheme.panel) -> some View {
+    func studioPanel(padding: CGFloat = 18, fill: Color = QuietlineTheme.panel) -> some View {
         modifier(StudioPanelModifier(padding: padding, fill: fill))
     }
 }
@@ -54,7 +54,7 @@ extension View {
 struct PillButtonStyle: ButtonStyle {
     var fill: Color
     var foreground: Color
-    var stroke: Color = LonerTheme.border
+    var stroke: Color = QuietlineTheme.border
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -78,7 +78,7 @@ struct PillButtonStyle: ButtonStyle {
 struct IconButtonStyle: ButtonStyle {
     var fill: Color
     var foreground: Color
-    var stroke: Color = LonerTheme.border
+    var stroke: Color = QuietlineTheme.border
     var size: CGFloat = 42
 
     func makeBody(configuration: Configuration) -> some View {

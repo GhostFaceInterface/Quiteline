@@ -158,7 +158,7 @@ public struct ExportService {
             throw reader.error ?? TimelineComposerError.exportSessionCreationFailed
         }
 
-        let queue = DispatchQueue(label: "lonermac.export.linearpcm")
+        let queue = DispatchQueue(label: "quietline.export.linearpcm")
 
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             writerInput.requestMediaDataWhenReady(on: queue) {

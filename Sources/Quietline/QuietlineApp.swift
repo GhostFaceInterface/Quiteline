@@ -9,12 +9,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 @main
-struct LonerMACApp: App {
+struct QuietlineApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var viewModel = ProjectViewModel()
 
     var body: some Scene {
-        WindowGroup("LonerMAC") {
+        WindowGroup("Quietline") {
             ContentView(viewModel: viewModel)
                 .frame(minWidth: 1100, minHeight: 720)
         }

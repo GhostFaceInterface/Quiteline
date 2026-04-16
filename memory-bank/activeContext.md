@@ -1,9 +1,9 @@
 # Active Context
 
 ## Current Task
-1. Export format secimini yalnizca audio ile sinirli olmaktan cikarmak
-2. Input dosyalari audio, video veya karisik olsa bile kullanici isterse MP4 video output uretmek
-3. Audio-only bolumlerde video export icin bos/siyah goruntu kullanmak
+1. Uygulama adini Quietline olarak sabitlemek
+2. Eski marka isimlerini kaynak, paket, bundle, dokuman ve kurulum artefact'lerinden kaldirmak
+3. Quietline build, bundle launch ve yerel kurulum akisini dogrulamak
 
 ## Recent Changes
 - Arayuz daha kompakt hale getirildi
@@ -43,6 +43,16 @@
 - MP4 export dosya boyutu kontrol altina alindi; efektsiz export'ta `AVAssetExportPresetPassthrough`, `audioMix = nil` ve `videoComposition = nil` ile orijinal medya segmentlerinin yeniden encode edilmesi engelleniyor
 - MP4 passthrough export'ta gercek video iceren projelerde audio-only/silence araliklari artik video track icinde bos zaman araligi olarak birakiliyor; bu, orijinal video segmentlerini yeniden encode etmeden kopyalama sansini artiriyor ve dusuk cozunurluklu siyah klibin codec/format uyumsuzluguyla export'u bozmasini engelliyor
 - Tum proje audio-only ise video format output icin 160x90, 1 fps, dusuk bitrate siyah H.264 gecici video asset'i hala kullaniliyor
+- SwiftPM GUI app icin `script/build_and_run.sh` eklendi; script build sonrasi `dist/Quietline.app` bundle yapisini uretip `/usr/bin/open -n` ile foreground macOS app olarak aciyor
+- Bundle icin `Info.plist`, ad-hoc codesign denemesi ve `Scripts/GenerateAppIcon.swift` tabanli `AppIcon.icns` uretimi eklendi
+- Codex masaustu Run aksiyonu `.codex/environments/environment.toml` icinde `./script/build_and_run.sh` komutuna baglandi
+- README calistirma bolumu terminalde `swift run` yerine `.app` bundle, verify ve istege bagli install akisini anlatacak sekilde guncellendi
+- `./script/build_and_run.sh --verify` ile build, bundle staging ve foreground launch dogrulandi
+- `./script/build_and_run.sh --install` ile bundle `/Users/boe747/Applications/Quietline.app` altina kopyalandi ve kurulu bundle'in ad-hoc imzasi dogrulandi
+- Uygulama markasi Quietline olarak degistirildi
+- SwiftPM package/product/target adi `Quietline`, kaynak klasoru `Sources/Quietline`, app entrypoint dosyasi `QuietlineApp.swift` oldu
+- UI basligi, pencere basligi, varsayilan proje dosyasi, temp dosya prefix'i, dispatch queue label'i ve bundle id `com.quietline.app` olarak guncellendi
+- Eski app kopyalari lokal kurulum ve dist klasorlerinden kaldirildi
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi
@@ -61,6 +71,9 @@
 - Video export icin gecici siyah video yalnizca timeline'da hic gercek video yoksa 160x90, 1 fps ve dusuk bitrate olarak uretilir; gercek video bulunan projelerde audio-only araliklar passthrough track boslugu olarak temsil edilir
 - Ses/fade/boost efekti olan MP4 export'ta passthrough kullanilmaz; audioMix gerektigi icin AVFoundation reencode fallback'i devreye girer
 - Passthrough export farkli codec, transform veya boyut kombinasyonlarinda gercek medya ile mutlaka kontrol edilmeli; bu yol dosya boyutunu dusurur ama AVFoundation uyumlulugu inputlara bagli olabilir. Passthrough basarisiz olursa `AVAssetExportPreset960x540` videoComposition fallback'i siyah arka planla devreye girer
+- Uygulamayi gercek macOS app olarak acmak icin ham SwiftPM executable degil `dist/Quietline.app` bundle'i kullanilmali; `script/build_and_run.sh` bu bundle'i her build'de yeniden sahneler
+- Kalici kullanici kurulumu icin `script/build_and_run.sh --install` bundle'i `~/Applications/Quietline.app` altina kopyalar; bu akisin Codex tarafinda kullanici onayi ile calistigi dogrulandi
+- Eski marka ismi source tree, package metadata, docs ve lokal app kurulumunda temizlendi
 
 ## Next Steps
 - Gercek medya dosyalariyla timeline waveform seek davranisini manuel test et

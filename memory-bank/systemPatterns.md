@@ -5,6 +5,8 @@
 - `ProjectViewModel` tum timeline state ve playback/export akislarini yonetir
 - `TimelineComposer` AVMutableComposition ve AVAudioMix olusturur
 - `MediaAssetLoader` dosyalari okuyup waveform verisi cikarir
+- SwiftPM executable, yerel kullanim icin `script/build_and_run.sh` tarafindan `dist/Quietline.app` bundle'ina paketlenir
+- Bundle `Contents/MacOS/Quietline`, `Contents/Info.plist` ve uretilmis `Contents/Resources/AppIcon.icns` yapisini kullanir
 
 ## Playback Pattern
 - `AVPlayer` preview icin tek kaynak
@@ -44,3 +46,7 @@
   - Ana waveform tum klipleri ard arda gosterir
   - Secili klip sadece highlight ve kontrol paneli ile temsil edilir
   - Seek ve secim ayni waveform yuzeyinde yapilir
+- SwiftPM GUI launch icin ham executable yerine app bundle launch tercih edilir:
+  - Bundle staging `dist/Quietline.app` altinda yapilir
+  - Launch `/usr/bin/open -n dist/Quietline.app` ile yapilir
+  - Kalici lokal kurulum gerekiyorsa ayni bundle `~/Applications/Quietline.app` altina kopyalanir

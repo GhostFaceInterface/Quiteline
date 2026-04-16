@@ -387,7 +387,7 @@ public struct TimelineComposer {
         averageBitRate: Int
     ) throws -> URL {
         let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("lonermac-black-\(UUID().uuidString)")
+            .appendingPathComponent("quietline-black-\(UUID().uuidString)")
             .appendingPathExtension("mp4")
         let writer = try AVAssetWriter(outputURL: outputURL, fileType: .mp4)
         let compressionProperties: [String: Any] = [

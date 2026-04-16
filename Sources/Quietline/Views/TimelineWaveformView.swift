@@ -33,10 +33,10 @@ struct TimelineWaveformView: View {
             ScrollView(.horizontal) {
                 ZStack(alignment: .topLeading) {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(LonerTheme.panelSecondary)
+                        .fill(QuietlineTheme.panelSecondary)
 
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(LonerTheme.border, lineWidth: 1)
+                        .stroke(QuietlineTheme.border, lineWidth: 1)
 
                     gridOverlay
                         .padding(.vertical, 16)
@@ -78,7 +78,7 @@ struct TimelineWaveformView: View {
 
                         let playheadX = xPosition(for: playheadTime, width: size.width)
                         let playheadRect = CGRect(x: playheadX - 1.25, y: 8, width: 2.5, height: height - 16)
-                        context.fill(Path(roundedRect: playheadRect, cornerRadius: 1.25), with: .color(LonerTheme.textPrimary))
+                        context.fill(Path(roundedRect: playheadRect, cornerRadius: 1.25), with: .color(QuietlineTheme.textPrimary))
                     }
 
                     labelsOverlay(width: contentWidth)
@@ -97,7 +97,7 @@ struct TimelineWaveformView: View {
         VStack(spacing: 0) {
             ForEach(0..<4, id: \.self) { index in
                 Rectangle()
-                    .fill(index == 2 ? LonerTheme.borderStrong : LonerTheme.border.opacity(0.6))
+                    .fill(index == 2 ? QuietlineTheme.borderStrong : QuietlineTheme.border.opacity(0.6))
                     .frame(height: 1)
                 if index < 3 {
                     Spacer()
@@ -115,7 +115,7 @@ struct TimelineWaveformView: View {
 
                 Text(clip.title)
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(LonerTheme.textSecondary)
+                    .foregroundStyle(QuietlineTheme.textSecondary)
                     .lineLimit(1)
                     .frame(width: clipWidth, alignment: .leading)
                     .offset(x: startX + 8, y: 18)
@@ -134,10 +134,10 @@ struct TimelineWaveformView: View {
 
         return AnyView(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(LonerTheme.selectionOverlay)
+                .fill(QuietlineTheme.selectionOverlay)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(LonerTheme.textPrimary.opacity(0.45), style: StrokeStyle(lineWidth: 1.5, dash: [7, 4]))
+                        .stroke(QuietlineTheme.textPrimary.opacity(0.45), style: StrokeStyle(lineWidth: 1.5, dash: [7, 4]))
                 )
                 .frame(width: max(selectionWidth, 2), height: height - 34)
                 .offset(x: startX, y: 17)
