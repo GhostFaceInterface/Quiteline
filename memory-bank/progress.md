@@ -41,6 +41,8 @@
 - Soyut toka motifi, gitar teli arka plan cizgileri, koyu waveform sahnesi ve yenilenmis app icon
 - Hitori wallpaper denemesi geri alindi; UI tekrar soyut pembe-aqua arka plan ve acik pastel panellere dondu
 - Header'dan `Ac`, `Kaydet` ve `Sessizlik` butonlarinin kaldirilmasi korunuyor
+- README Hitori Gotoh/Bocchi temali, renkli badge'li, gifli ve uygulama ekran gorselleriyle zenginlestirildi
+- `pics for readme` klasorundeki wallpaper, 3 kullanim gorseli, 4 gif ve 1 webp README icinde kullaniliyor
 
 ## In Progress
 - Yeni Hitori esintili UI'in gercek kullanim kontrasti ve hissi manuel degerlendirilecek
@@ -74,6 +76,7 @@
 - `screencapture` ile otomatik gorsel kontrol denendi ancak macOS display erisimi `could not create image from display` hatasi verdi
 - Koyu/cam ada wallpaper denemesi geri alindiktan sonra `swift build`, `./script/build_and_run.sh --install` ve codesign dogrulamasi basarili
 - SwiftPM build cache temizlendi; kurulu `Quietline.app` kaynak wallpaper bundle'i tasimiyor, yalnizca `AppIcon.icns` resources altinda kaliyor
+- README yenilemesi sonrasi `git diff --check` basarili
 - `/Users/boe747/Applications/Quietline.app` kurulumu tamamlandi; kullanici artik Finder/Spotlight/Dock uzerinden uygulama ikonuna tiklayarak acabilir
 - Rename sonrasi eski marka referanslari kaynak, dokuman ve config dosyalarinda bulunmadi
 - SwiftPM build cache temizlenip Quietline olarak yeniden build edildi; eski marka adli build artefact'i kalmadigi dogrulandi

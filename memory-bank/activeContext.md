@@ -1,9 +1,9 @@
 # Active Context
 
 ## Current Task
-1. Basarisiz koyu/wallpaper denemesinden eski acik pembe-pastel UI'a geri donmek
-2. Gereksiz header butonlarini kaldirilmis halde korumak
-3. Build/install dogrulamasini yenilemek
+1. README'yi Hitori Gotoh/Bocchi temali, gorselli ve daha eglenceli hale getirmek
+2. `pics for readme` klasorundeki tum gif ve kullanim gorsellerini README icinde kullanmak
+3. Kurulum, kullanim, export opsiyonlari ve gelistirici notlarini netlestirmek
 
 ## Recent Changes
 - Arayuz daha kompakt hale getirildi
@@ -63,6 +63,8 @@
 - Koyu/cam ada wallpaper denemesi kullanici tarafindan reddedildi; UI tekrar eski acik pembe-pastel panel duzenine tasindi
 - `QuietlineBackdrop` artik resource fotografi degil soyut pembe-aqua gradient, geometrik bloklar ve gitar teli cizgileri kullaniyor
 - `Package.swift` kaynak `Resources` klasorunu exclude ediyor; temiz build sonrasi kurulu app bundle'inda yalnizca `AppIcon.icns` kaliyor
+- README, `pics for readme` altindaki Hitori wallpaper, 3 kullanim gorseli, gifler ve webp mood gorseliyle yeniden yazildi
+- `pics for readme ` klasor adindaki sondaki bosluk temizlenerek klasor `pics for readme` haline getirildi; README linkleri URL-encoded path kullaniyor
 
 ## Important Notes
 - Editor artik tek ana waveform kullaniyor; onceki iki-katmanli waveform yapisi kaldirildi
@@ -85,6 +87,7 @@
 - Kalici kullanici kurulumu icin `script/build_and_run.sh --install` bundle'i `~/Applications/Quietline.app` altina kopyalar; bu akisin Codex tarafinda kullanici onayi ile calistigi dogrulandi
 - Eski marka ismi source tree, package metadata, docs ve lokal app kurulumunda temizlendi
 - Wallpaper/cam ada denemesi urunun hissini bozdu; simdilik tercih edilen yol acik pembe-pastel kartlar ve soyut Hitori esintili arka plan.
+- README gorselleri repo ici `pics for readme` klasorunden referanslanir; dosya adlarindaki bosluk ve Turkce karakterler markdown linklerinde URL-encoded tutulmali.
 
 ## Next Steps
 - Yeni Hitori esintili UI'i gercek ekran kullaniminda okunabilirlik ve kontrast acisindan manuel gozden gecir
